@@ -3,6 +3,7 @@ import { useState, useEffect, useFocusEffect, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { getMutualFundSummary, getAllMutualFunds, deleteMutualFund } from '../../../database/mutualFundDB';
+import AppHeader from '../../../components/AppHeader/AppHeader';
 
 export default function MutualFundScreen() {
     const navigation = useNavigation();
@@ -59,6 +60,7 @@ export default function MutualFundScreen() {
     if (investments.length === 0) {
         return (
             <View style={styles.container}>
+                <AppHeader showBack />
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -91,6 +93,7 @@ export default function MutualFundScreen() {
 
     return (
         <View style={styles.container}>
+            <AppHeader showBack />
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>

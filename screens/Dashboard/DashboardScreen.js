@@ -4,6 +4,7 @@ import { getUser, deleteUser } from '../../database/db';
 import { getMutualFundSummary } from '../../database/mutualFundDB';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AppHeader from '../../components/AppHeader/AppHeader';
 
 export default function DashboardScreen() {
     const navigation = useNavigation();
@@ -13,17 +14,39 @@ export default function DashboardScreen() {
 
 
 
+    // useEffect(() => {
+    //     const loadUser = async () => {
+    //         const user = await getUser();
+    //         if (user) setUserName(user.name);
+
+    //         const mfSummary = await getMutualFundSummary();
+    //         setMfValue(mfSummary.total_current || 0);
+
+    //         console.log('Dashboard loaded', mfSummary.total_current);
+
+    //     };
+    //     loadUser();
+    // }, []);
+
     useEffect(() => {
-        const loadUser = async () => {
-            const user = await getUser();
-            if (user) setUserName(user.name);
+        const unsubscribe = navigation.addListener('focus', () => {
 
-            const mfSummary = await getMutualFundSummary();
-            setMfValue(mfSummary.total_current || 0);
+            const loadUser = async () => {
+                const user = await getUser();
+                if (user) setUserName(user.name);
 
-        };
-        loadUser();
-    }, []);
+                const mfSummary = await getMutualFundSummary();
+                setMfValue(mfSummary.total_current || 0);
+
+                // console.log('Dashboard loaded', mfSummary.total_current);
+
+            };
+
+            loadUser();
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     // Get initials from name (e.g., "Adarsh Pandey" -> "AP")
     const getInitials = (name) => {
@@ -85,10 +108,10 @@ export default function DashboardScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
+            {/* <StatusBar barStyle="light-content" backgroundColor="#0F172A" /> */}
 
             {/* Header */}
-            <View style={styles.header}>
+            {/* <View style={styles.header}>
                 <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
                     <View style={styles.profileImage}>
                         <Text style={styles.profileText}>{getInitials(userName)}</Text>
@@ -106,7 +129,9 @@ export default function DashboardScreen() {
                         <Ionicons name="search-outline" size={24} color="#fff" />
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View> */}
+
+            <AppHeader />
 
             {/* My Assets Section */}
             <View style={styles.assetsSection}>

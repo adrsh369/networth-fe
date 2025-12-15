@@ -22,7 +22,7 @@ export default function StackNavigator() {
         <SafeAreaProvider>
             <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
             <NavigationContainer>
-                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                <Stack.Navigator screenOptions={{ headerShown: false, animation: 'none' }}>
                     <Stack.Screen name="Splash" component={SplashScreen} />
                     <Stack.Screen name="CreateProfile" component={CreateProfileScreen} />
                     <Stack.Screen name="Fingerprint" component={FingerprintScreen} />
