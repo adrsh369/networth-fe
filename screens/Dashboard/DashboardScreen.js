@@ -5,13 +5,14 @@ import { getMutualFundSummary } from '../../database/mutualFundDB';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../../components/AppHeader/AppHeader';
+import { getAllFixedDeposits, getFixedDepositSummary } from '../../database/fixedDepositDB';
 
 export default function DashboardScreen() {
     const navigation = useNavigation();
     const [userName, setUserName] = useState('');
     const [showAll, setShowAll] = useState(false);
     const [mfValue, setMfValue] = useState(0);
-
+    const [fdValue, setFdValue] = useState(0);
 
 
     // useEffect(() => {
@@ -35,10 +36,42 @@ export default function DashboardScreen() {
                 const user = await getUser();
                 if (user) setUserName(user.name);
 
+
+                // ----------------Mutual Fund Start-------------
+
                 const mfSummary = await getMutualFundSummary();
                 setMfValue(mfSummary.total_current || 0);
 
-                // console.log('Dashboard loaded', mfSummary.total_current);
+                // ----------------Mutual Fund End-------------
+
+
+                // ----------------Fixed Deposit Start-------------
+
+                const summaryData = await getFixedDepositSummary();
+                const depositsData = await getAllFixedDeposits();
+
+                // Calculate current returns for all deposits
+                let totalCurrentReturn = 0;
+                const depositsWithReturns = depositsData.map(deposit => {
+                    const returns = calculateFixedDepositCurrentReturns(
+                        deposit.investment_amount,
+                        deposit.annual_rate,
+                        deposit.start_date,
+                        deposit.tenure_years,
+                        deposit.tenure_months,
+                        deposit.tenure_days,
+                        deposit.deposit_type,
+                        deposit.compounding_frequency
+                    );
+                    totalCurrentReturn += returns;
+                    return { ...deposit, currentReturns: returns };
+                });
+
+                const totalFd = (summaryData.total_invested || 0) + (totalCurrentReturn || 0);
+                console.log('Total FD Value:', totalFd);
+                setFdValue(totalFd);
+
+                // ----------------Fixed Deposit End-------------
 
             };
 
@@ -47,6 +80,39 @@ export default function DashboardScreen() {
 
         return unsubscribe;
     }, [navigation]);
+
+    const calculateFixedDepositCurrentReturns = (principal, rate, startDate, tenureYears, tenureMonths, tenureDays, depositType, frequency) => {
+        const start = new Date(startDate);
+        const today = new Date();
+
+        // Calculate days elapsed
+        const timeDiff = today - start;
+        const daysElapsed = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+        if (daysElapsed <= 0) return 0;
+
+        const rateDecimal = rate / 100;
+        const yearsElapsed = daysElapsed / 365;
+
+        let interest = 0;
+
+        if (depositType === 'Cumulative') {
+            // Compound interest calculation
+            let n = 4; // Default quarterly
+            if (frequency === 'Monthly') n = 12;
+            else if (frequency === 'Daily') n = 365;
+            else if (frequency === 'Half Yearly') n = 2;
+            else if (frequency === 'Yearly') n = 1;
+
+            const amount = principal * Math.pow(1 + rateDecimal / n, n * yearsElapsed);
+            interest = amount - principal;
+        } else {
+            // Simple interest for Payout and Tax Saving
+            interest = principal * rateDecimal * yearsElapsed;
+        }
+
+        return Math.round(interest);
+    };
 
     // Get initials from name (e.g., "Adarsh Pandey" -> "AP")
     const getInitials = (name) => {
@@ -58,8 +124,9 @@ export default function DashboardScreen() {
 
     const allAssets = [
         { name: 'Mutual Funds', value: Number(mfValue || 0), icon: '📊' },
+        { name: 'Fixed Deposits', value: Number(fdValue || 0), icon: '🏦' },
+        { name: 'Recurring Deposits', value: Number(fdValue || 0), icon: '🏦' },
         { name: 'INDstocks', value: 0, icon: '₹' },
-        { name: 'Fixed Deposits', value: 0, isLakh: true, icon: '🏦' },
         { name: 'EPF', value: 0, icon: '👤' },
         { name: 'Other Brokers', value: 0, raw: true, icon: '💼' },
         { name: 'Gold', value: 0, icon: '🪙' },
@@ -70,7 +137,7 @@ export default function DashboardScreen() {
 
     const assetRoutes = {
         'Mutual Funds': 'MutualFund',
-        'Gold': 'Gold',
+        'Fixed Deposits': 'FixedDeposit',
         'Stocks': 'Stocks',
         'Bonds': 'Bonds',
         'PPF': 'PPF',

@@ -13,6 +13,9 @@ import ProfileScreen from '../screens/Dashboard/ProfileScreen/ProfileScreen'
 import MutualFundScreen from '../screens/NetworthScreen/MutualFund/MutualFundScreen';
 import AddMutualFundScreen from '../screens/NetworthScreen/MutualFund/AddMutualFundScreen';
 
+import FixedDepositScreen from '../screens/NetworthScreen/FixedDeposit/FixedDepositScreen';
+import AddFixedDepositScreen from '../screens/NetworthScreen/FixedDeposit/AddfixedDepositScreen';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +34,10 @@ export default function StackNavigator() {
                     <Stack.Screen name="Profile" component={ProfileScreen} />
                     <Stack.Screen name="MutualFund" component={MutualFundScreen} />
                     <Stack.Screen name="AddMutualFund" component={AddMutualFundScreen} />
+
+                    <Stack.Screen name="FixedDeposit" component={FixedDepositScreen} />
+                    <Stack.Screen name="AddfixedDeposit" component={AddFixedDepositScreen} />
+
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>
